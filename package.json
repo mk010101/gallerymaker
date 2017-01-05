@@ -1,0 +1,21 @@
+{
+  "name": "gallerymaker",
+  "version": "1.0.0",
+  "description": "makes preview",
+  "main": "src/index.html",
+  "chromium-args": "--mixed-context",
+  "window": {
+    "title": "vt5 builder",
+    "width": 1200,
+    "height": 800,
+    "frame": true
+  },
+  "scripts": {
+  },
+  "author": "mk010101",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^1.0.0",
+    "sharp": "^0.17.0"
+  }
+}
