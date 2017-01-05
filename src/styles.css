@@ -14,15 +14,37 @@ body {
 
 nav {
     width: 20vw;
-    min-width: 200px;
+    min-width: 230px;
     border-right: 1px solid #cccccc;
     padding: 10px;
 }
 
 nav label {
     margin-right: 5px;
+    display: inline-block;
 }
 
 section {
     margin-bottom: 10px;
+}
+
+#features {
+    padding: 5px;
+    background-color: #e7eef5;
+}
+
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.item {
+    margin: 4px;
+}
+
+.item > img {
+    width: 300px;
 }

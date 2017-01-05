@@ -4,23 +4,20 @@
     <meta charset="UTF-8">
     <title>g-maker</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="main.js"></script>
 </head>
 <body>
 <nav>
     <section>
-        <input type="file" data-id="open" nwdirectory />
+        <input type="file" id="open" nwdirectory />
     </section>
-    <section id="features">
-
-    </section>
+    <section id="features"></section>
 </nav>
-<main>
-
+<main id="view">
 </main>
 <script>
     window.onload = function () {
-        Main();
+        let main = require("../src/main");
+        main.init();
     }
 </script>
 </body>
