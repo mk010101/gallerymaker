@@ -52,6 +52,7 @@ function setListeners() {
     document.getElementById("btnOpen").addEventListener("click", onOpenDir);
     document.getElementById("select-all").addEventListener("click", selectAll);
     document.getElementById("select-none").addEventListener("click", selectNone);
+    document.getElementById("bg").addEventListener("click", setBg);
     fileOpen.addEventListener("change", onDirSelect);
     thumbSizeSlider.addEventListener("change", onThumbSizeChange);
     viewEl.addEventListener("click", imgSelectHandler);
@@ -284,6 +285,17 @@ function showAll() {
         items[i].classList.remove("hidden");
     }
 }
+
+
+function setBg(e) {
+
+    let bg = e.target.getAttribute("data-id");
+
+    if (bg) {
+        viewEl.style.backgroundColor = bg;
+    }
+}
+
 
 
 
