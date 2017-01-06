@@ -12,6 +12,10 @@ body {
     font-size: 12px;
 }
 
+h5 {
+    margin: 0;
+}
+
 nav {
     width: 20vw;
     min-width: 230px;
@@ -25,7 +29,7 @@ nav label {
 }
 
 section {
-    margin-bottom: 10px;
+    margin-bottom: 16px;
 }
 
 #features {
@@ -42,9 +46,12 @@ main {
 }
 
 .item {
-    margin: 4px;
+    margin: 1px;
+    width: 250px;
+    height: 250px;
+    border: 1px solid #cccccc;
 }
 
-.item > img {
-    width: 300px;
+.item.marked {
+    border: 1px solid #32cc14;
 }

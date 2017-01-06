@@ -7,10 +7,17 @@
 </head>
 <body>
 <nav>
+    <section>files: <span id="num-files"></span></section>
     <section>
-        <input type="file" id="open" nwdirectory />
+        <button id="btnOpen">Open dir</button>
+        <input type="file" id="open" name="zz" style="display: none" nwdirectory />
     </section>
+    <h5>Features</h5>
     <section id="features"></section>
+    <section>
+        <h5>Preview size</h5>
+        <input type="range" id="thumb-size" min="100" max="400" step="20" value="200">
+    </section>
 </nav>
 <main id="view">
 </main>
