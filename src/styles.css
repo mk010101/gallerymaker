@@ -17,6 +17,15 @@ h5 {
     padding-bottom: 4px;
 }
 
+button {
+    outline: none;
+    border: 1px solid #cccccc;
+    background-color: #e7eef5;
+}
+button:hover {
+    background-color: #d7ebf5;
+}
+
 nav {
     width: 20vw;
     min-width: 230px;

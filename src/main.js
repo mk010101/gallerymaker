@@ -2,6 +2,7 @@ const fs = require("fs-extra");
 const sharp = require("sharp");
 
 let fileOpen;
+let fileSave;
 let thumbSizeSlider;
 let numFilesEl;
 let viewEl;
@@ -17,15 +18,17 @@ let dir;
 let filesArr = [];
 
 let db = {};
+let filesMap = {};
 
 let keyShiftDown = false;
 
 
-exports.init = function() {
+exports.init = function () {
 
     let features = ["front", "34", "side", "full"];
 
     fileOpen = document.getElementById("open");
+    fileSave = document.getElementById("save");
     thumbSizeSlider = document.getElementById("thumb-size");
     numFilesEl = document.getElementById("num-files");
     viewEl = document.getElementById("view");
@@ -41,8 +44,8 @@ exports.init = function() {
         strShow += `<button data-id="${f}">${f}</button>`
     }
 
-   featuresEl.innerHTML = str;
-   showEl.innerHTML = strShow;
+    featuresEl.innerHTML = str;
+    showEl.innerHTML = strShow;
 
     setListeners();
 
@@ -50,6 +53,7 @@ exports.init = function() {
 
 function setListeners() {
     document.getElementById("btnOpen").addEventListener("click", onOpenDir);
+    document.getElementById("btnSave").addEventListener("click", save);
     document.getElementById("select-all").addEventListener("click", selectAll);
     document.getElementById("select-none").addEventListener("click", selectNone);
     document.getElementById("bg").addEventListener("click", setBg);
@@ -70,6 +74,7 @@ function onOpenDir() {
     fileOpen.click();
 }
 
+
 function onThumbSizeChange() {
     thumbSize = thumbSizeSlider.value;
     buildView();
@@ -78,7 +83,8 @@ function onThumbSizeChange() {
 function onDirSelect(e) {
 
     filesArr = [];
-    db = {files:[]};
+    db = {files: []};
+    filesMap = {};
 
     dir = e.path[0].files[0].path + "/";
     pathSrc = e.path[0].files[0].path + "/src/";
@@ -86,12 +92,15 @@ function onDirSelect(e) {
 
     let files = fs.readdirSync(pathSrc);
 
-    console.log(fs.existsSync(dir + "/db.json"));
+    let json = dir + "/db.json";
+    if (fs.existsSync(json)) {
+       parseDb(json);
+    }
 
     for (let i = 0; i < files.length; i++) {
 
         let f = pathSrc + files[i];
-        if(fs.lstatSync(f).isDirectory()) {
+        if (fs.lstatSync(f).isDirectory()) {
             parseDirectory(f, files[i]);
         }
     }
@@ -103,7 +112,6 @@ function onDirSelect(e) {
 }
 
 
-
 function parseDirectory(dir, dirName) {
 
     let files = fs.readdirSync(dir);
@@ -111,7 +119,7 @@ function parseDirectory(dir, dirName) {
     for (let i = 0; i < files.length; i++) {
 
         let f = dir + "/" + files[i];
-        if(f.search(/.png|.jpg/i) > -1) {
+        if (f.search(/.png|.jpg/i) > -1) {
             filesArr.push({
                 folder: dirName,
                 fileName: files[i],
@@ -130,9 +138,14 @@ function buildView() {
 
     for (let i = 0; i < filesArr.length; i++) {
         let obj = filesArr[i];
+        if(filesMap.hasOwnProperty(obj.path)) {
+            obj = filesMap[obj.path];
+            filesArr[i] = obj;
+        }
         let f = "file:///" + obj.path;
-        let feature = obj.feature? `data-feature="${obj.feature}"` : "";
-        let marked = obj.feature? "marked" : "";
+        let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
+        let marked = obj.feature ? "marked" : "";
+
         str += `<div class="item ${marked}" 
                     data-id="${i}" ${feature}
                     style="background: url('${f}'); 
@@ -150,23 +163,21 @@ function buildView() {
 }
 
 function keyDownHandler(e) {
-    if(e.key === "Shift") keyShiftDown = true;
+    if (e.key === "Shift") keyShiftDown = true;
 }
 
 function keyUpHandler(e) {
-    if(e.key === "Shift") keyShiftDown = false;
+    if (e.key === "Shift") keyShiftDown = false;
 }
-
-
 
 
 function imgSelectHandler(e) {
 
     let img = e.target;
     let id = img.getAttribute("data-id");
-    if (! id) return;
+    if (!id) return;
 
-    if (! keyShiftDown) {
+    if (!keyShiftDown) {
         selectNone();
     }
 
@@ -222,7 +233,7 @@ function checkSelectedStatus() {
 function setSelectedStatus() {
 
     let el = document.querySelector("#features input:checked");
-    if (! el) return;
+    if (!el) return;
 
     let feature = el.getAttribute("data-feature");
     let selected = viewEl.querySelectorAll(".selected");
@@ -240,7 +251,7 @@ function setSelectedStatus() {
 function showHide(e) {
 
     let id = e.target.getAttribute("data-id");
-    if (! id) return;
+    if (!id) return;
 
     selectNone();
 
@@ -254,12 +265,12 @@ function showHide(e) {
             items[i].classList.remove("hidden");
         }
 
-        if (id === "unmarked"){
+        if (id === "unmarked") {
             showAll();
             let items = viewEl.querySelectorAll(".item");
             for (let i = 0; i < items.length; i++) {
                 let item = items[i];
-                if (! item.getAttribute("data-feature")){
+                if (!item.getAttribute("data-feature")) {
                     item.classList.remove("hidden");
                 } else {
                     item.classList.add("hidden");
@@ -293,6 +304,22 @@ function setBg(e) {
 
     if (bg) {
         viewEl.style.backgroundColor = bg;
+    }
+}
+
+
+function save() {
+    let obj = {};
+    obj.files = filesArr;
+    let json = JSON.stringify(obj);
+    fs.writeFileSync(dir + "db.json", json, "utf8");
+}
+
+function parseDb(file) {
+    let files = fs.readJsonSync(file).files;
+    for (let i = 0; i < files.length; i++) {
+        let obj = files[i];
+        filesMap[obj.path] = obj;
     }
 }
 
