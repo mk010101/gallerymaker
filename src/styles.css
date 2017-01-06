@@ -14,6 +14,7 @@ body {
 
 h5 {
     margin: 0;
+    padding-bottom: 4px;
 }
 
 nav {
@@ -39,8 +40,6 @@ section {
 
 
 main {
-    display: flex;
-    flex-wrap: wrap;
     overflow-y: auto;
     height: 100vh;
 }
@@ -50,8 +49,27 @@ main {
     width: 250px;
     height: 250px;
     border: 1px solid #cccccc;
+    display: inline-block;
 }
 
 .item.marked {
-    border: 1px solid #32cc14;
+    border: 4px solid #32cc14;
 }
+
+.item.selected {
+    border: 4px solid #ff0000;
+}
+
+.item.hidden {
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+
