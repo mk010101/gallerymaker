@@ -6,7 +6,7 @@
   "chromium-args": "--mixed-context",
   "window": {
     "title": "vt5 builder",
-    "width": 1200,
+    "width": 1280,
     "height": 800,
     "frame": true
   },

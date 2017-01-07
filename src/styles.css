@@ -44,7 +44,12 @@ section {
 
 #features {
     padding: 5px;
-    background-color: #e7eef5;
+    background-color: rgb(245, 98, 68);
+}
+
+#show {
+    padding: 5px;
+    background-color: rgb(110, 194, 210);
 }
 
 
@@ -52,6 +57,7 @@ main {
     overflow-y: auto;
     height: 100vh;
     width: 100%;
+    will-change: transform;
 }
 
 .item {
@@ -59,12 +65,12 @@ main {
     float: left;
     width: 250px;
     height: 250px;
-    border: 1px solid #cccccc;
+    border: 2px solid #cccccc;
     display: inline-block;
 }
 
-.item.marked {
-    border: 4px solid #32cc14;
+.item.marked > .thumb-feature {
+    display: inline-block;
 }
 
 .item.selected {
@@ -75,7 +81,12 @@ main {
     display: none;
 }
 
-
+.thumb-feature {
+    display: none;
+    padding: 2px;
+    background-color: #06eb07;
+    font-size: 14px;
+}
 
 
 

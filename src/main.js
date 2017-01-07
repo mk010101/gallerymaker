@@ -36,7 +36,7 @@ exports.init = function () {
     showEl = document.getElementById("show");
 
     let str = "";
-    let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button>`;
+    let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button><button data-id="marked">marked</button>`;
 
     for (let i = 0; i < features.length; i++) {
         let f = features[i];
@@ -145,7 +145,7 @@ function buildView() {
         let f = "file:///" + obj.path;
         let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
         let marked = obj.feature ? "marked" : "";
-
+        let markedDiv = obj.feature? `<div class="thumb-feature">${obj.feature}</div>` : "<div class='thumb-feature'></div>";
         str += `<div class="item ${marked}" 
                     data-id="${i}" ${feature}
                     style="background: url('${f}'); 
@@ -153,8 +153,8 @@ function buildView() {
                     background-repeat: no-repeat; 
                     background-position: center;
                     width: ${thumbSize}px;
-                    height: ${thumbSize}px;
-                    ">
+                    height: ${thumbSize}px;">
+                    ${markedDiv}
                 </div>`;
     }
 
@@ -244,6 +244,7 @@ function setSelectedStatus() {
         obj.feature = feature;
         selected[i].classList.add("marked");
         selected[i].setAttribute("data-feature", obj.feature);
+        selected[i].querySelector(".thumb-feature").innerHTML = obj.feature;
     }
 
 }
@@ -274,6 +275,14 @@ function showHide(e) {
                     item.classList.remove("hidden");
                 } else {
                     item.classList.add("hidden");
+                }
+            }
+        } else if (id === "marked") {
+            let items = viewEl.querySelectorAll(".item");
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+                if (item.getAttribute("data-feature")) {
+                    item.classList.remove("hidden");
                 }
             }
         }
