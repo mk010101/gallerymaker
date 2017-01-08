@@ -9,10 +9,12 @@
 <nav>
     <section>files: <span id="num-files"></span></section>
     <section>
-        <button id="btnOpen">Open dir</button>
-        <button id="btnSave">Save</button>
-        <input type="file" id="open" name="zz" style="display: none" nwdirectory />
+        <button id="btnOpen">Open dir</button><button id="btnSave">Save</button>
+        <input type="file" id="open" style="display: none" nwdirectory />
         <input type="file" nwsaveas="db.json" id="save" style="display: none"/>
+    </section>
+    <section>
+        <button id="fav"><span class="fav"></span></button>
     </section>
     <h5>Features</h5>
     <section id="features"></section>
@@ -22,8 +24,7 @@
     </section>
     <section>
         <h5>Select <span id="num-selected">0</span></h5>
-        <button id="select-all">All</button>
-        <button id="select-none">None</button>
+        <button id="select-all">All</button><button id="select-none">None</button>
     </section>
     <section>
         <h5>Show</h5>
@@ -33,8 +34,7 @@
     <section>
         <h5>Background</h5>
         <div id="bg">
-            <button data-id="#ffffff">light</button>
-            <button data-id="#333333">dark</button>
+            <button data-id="#ffffff">light</button><button data-id="#333333">dark</button>
         </div>
     </section>
 </nav>

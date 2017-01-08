@@ -9,7 +9,7 @@ let viewEl;
 let featuresEl;
 let showEl;
 
-let thumbSize = "150";
+let thumbSize = "200";
 
 let pathSrc;
 let pathPreview;
@@ -36,7 +36,7 @@ exports.init = function () {
     showEl = document.getElementById("show");
 
     let str = "";
-    let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button><button data-id="marked">marked</button>`;
+    let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button><button data-id="marked">marked</button><button data-id="fav"><span class="fav" data-id="fav"></span></button><p></p>`;
 
     for (let i = 0; i < features.length; i++) {
         let f = features[i];
@@ -57,6 +57,7 @@ function setListeners() {
     document.getElementById("select-all").addEventListener("click", selectAll);
     document.getElementById("select-none").addEventListener("click", selectNone);
     document.getElementById("bg").addEventListener("click", setBg);
+    document.getElementById("fav").addEventListener("click", setFavourite);
     fileOpen.addEventListener("change", onDirSelect);
     thumbSizeSlider.addEventListener("change", onThumbSizeChange);
     viewEl.addEventListener("click", imgSelectHandler);
@@ -94,7 +95,7 @@ function onDirSelect(e) {
 
     let json = dir + "/db.json";
     if (fs.existsSync(json)) {
-       parseDb(json);
+        parseDb(json);
     }
 
     for (let i = 0; i < files.length; i++) {
@@ -138,16 +139,18 @@ function buildView() {
 
     for (let i = 0; i < filesArr.length; i++) {
         let obj = filesArr[i];
-        if(filesMap.hasOwnProperty(obj.path)) {
+        if (filesMap.hasOwnProperty(obj.path)) {
             obj = filesMap[obj.path];
             filesArr[i] = obj;
         }
         let f = "file:///" + obj.path;
         let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
+        let fav = obj.fav ? `data-fav="1"` : "";
+        let favStyle = obj.fav? "fav" : "";
         let marked = obj.feature ? "marked" : "";
-        let markedDiv = obj.feature? `<div class="thumb-feature">${obj.feature}</div>` : "<div class='thumb-feature'></div>";
+        let markedDiv = obj.feature ? `<div class="thumb-feature ${favStyle}">${obj.feature}</div>` : "<div class='thumb-feature'></div>";
         str += `<div class="item ${marked}" 
-                    data-id="${i}" ${feature}
+                    data-id="${i}" ${feature} ${fav}
                     style="background: url('${f}'); 
                     background-size: contain; 
                     background-repeat: no-repeat; 
@@ -246,12 +249,34 @@ function setSelectedStatus() {
         selected[i].setAttribute("data-feature", obj.feature);
         selected[i].querySelector(".thumb-feature").innerHTML = obj.feature;
     }
+}
 
+function setFavourite() {
+
+    let selected = viewEl.querySelectorAll(".selected");
+
+    for (let i = 0; i < selected.length; i++) {
+        let el = selected[i];
+        let id = parseInt(el.getAttribute("data-id"));
+        let obj = filesArr[id];
+        let isFav = el.getAttribute("data-fav");
+        let div = selected[i].querySelector(".thumb-feature");
+        if (!isFav) {
+            div.classList.add("fav");
+            el.setAttribute("data-fav", 1);
+            obj.fav = 1;
+        } else {
+            div.classList.remove("fav");
+            el.removeAttribute("data-fav");
+            delete obj.fav;
+        }
+    }
 }
 
 function showHide(e) {
 
     let id = e.target.getAttribute("data-id");
+    console.log(id)
     if (!id) return;
 
     selectNone();
@@ -282,6 +307,14 @@ function showHide(e) {
             for (let i = 0; i < items.length; i++) {
                 let item = items[i];
                 if (item.getAttribute("data-feature")) {
+                    item.classList.remove("hidden");
+                }
+            }
+        } else if (id === "fav") {
+            let items = viewEl.querySelectorAll(".item");
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+                if (item.getAttribute("data-fav")) {
                     item.classList.remove("hidden");
                 }
             }
