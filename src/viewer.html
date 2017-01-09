@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>g-viewer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        h5 {
+            margin: 0;
+            padding-bottom: 4px;
+        }
+
+        button {
+            outline: none;
+            border: 1px solid #cccccc;
+            background-color: #64676a;
+            color: #f5f5f5;
+            cursor: pointer;
+            margin: 1px;
+        }
+        button:hover {
+            background-color: #8c99a0;
+        }
+
+        nav {
+            width: 20vw;
+            min-width: 230px;
+            border-right: 1px solid #cccccc;
+            padding: 10px;
+        }
+
+        nav label {
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        section {
+            margin-bottom: 16px;
+        }
+
+        #features {
+            padding: 5px;
+            background-color: rgb(245, 98, 68);
+        }
+
+        #show {
+            padding: 5px;
+            background-color: rgb(110, 194, 210);
+        }
+
+
+        main {
+            overflow-y: auto;
+            height: 100vh;
+            width: 100%;
+            will-change: transform;
+        }
+
+        .item {
+            margin: 1px;
+            float: left;
+            width: 250px;
+            height: 250px;
+            border: 2px solid #cccccc;
+            display: inline-block;
+        }
+
+        .item.selected {
+            border: 4px solid #ff0000;
+        }
+
+        .item.hidden {
+            display: none;
+        }
+
+
+        .fav:before {
+            content: "\2605 ";
+        }
+
+        #img-preview {
+            max-height: 100vh;
+            position: absolute;
+            left: 230px;
+            background-color: #d1dcdf;
+        }
+
+    </style>
+
+    <script>
+        let data = "__FILES__";
+    </script>
+
+</head>
+<body>
+<nav>
+    <section>files: <span id="num-files"></span></section>
+    <h5>Features</h5>
+    <section>
+        <h5>Preview size</h5>
+        <input type="range" id="thumb-size" min="100" max="500" step="20" value="200">
+    </section>
+    <section>
+        <h5>Show</h5>
+        <div id="show"></div>
+    </section>
+
+    <section>
+        <h5>Background</h5>
+        <div id="bg">
+            <button data-id="#ffffff">light</button><button data-id="#333333">dark</button>
+        </div>
+    </section>
+</nav>
+<main id="view">
+</main>
+<div class="preview"><img id="img-preview" src=""></div>
+<script>
+    window.onload = function () {
+
+        "use strict";
+
+        let thumbSizeSlider;
+        let numFilesEl;
+        let viewEl;
+        let showEl;
+        let previewEl;
+
+        let thumbSize = "200";
+
+        let filesArr = data.files;
+
+        let db = {};
+        let filesMap = {};
+
+
+        let features = data.features;
+
+        thumbSizeSlider = document.getElementById("thumb-size");
+        numFilesEl = document.getElementById("num-files");
+        viewEl = document.getElementById("view");
+        showEl = document.getElementById("show");
+        previewEl = document.getElementById("img-preview");
+
+
+        let currentSel = "fav";
+
+        let str = "";
+        let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button><button data-id="marked">marked</button><button data-id="fav"><span class="fav" data-id="fav"></span></button><p></p>`;
+
+        for (let i = 0; i < features.length; i++) {
+            let f = features[i];
+            strShow += `<button data-id="${f}">${f}</button>`;
+            filesMap[f] = [];
+        }
+
+        showEl.innerHTML = strShow;
+
+        parseData();
+        setListeners();
+        render();
+
+
+
+        function setListeners() {
+            document.getElementById("bg").addEventListener("click", setBg);
+            thumbSizeSlider.addEventListener("change", onThumbSizeChange);
+            viewEl.addEventListener("click", imgSelectHandler);
+            showEl.addEventListener("click", showHide);
+            
+            previewEl.addEventListener("click", function () {
+                previewEl.src = "";
+            })
+
+        }
+
+        function parseData() {
+
+            numFilesEl.innerHTML = filesArr.length + "";
+
+            for (let i = 0; i < filesArr.length; i++) {
+
+            }
+        }
+
+        function render() {
+
+            let str = "";
+
+            for (let i = 0; i < filesArr.length; i++) {
+                let obj = filesArr[i];
+
+                let f = `src/${obj.folder}/${obj.fileName}`;
+                let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
+                let fav = obj.fav ? `data-fav="1"` : "";
+                let favStyle = obj.fav? "fav" : "";
+
+                str += `<div class="item"
+                    data-id="${i}" ${feature} ${fav}
+                    style="background: url('${f}');
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    width: ${thumbSize}px;
+                    height: ${thumbSize}px;">
+                </div>`;
+            }
+
+            viewEl.innerHTML = str;
+
+        }
+
+        function hideAll() {
+            let items = viewEl.querySelectorAll(".item");
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.add("hidden");
+            }
+        }
+
+        function showAll() {
+            let items = viewEl.querySelectorAll(".item");
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove("hidden");
+            }
+        }
+
+        function showHide(e) {
+
+            let id = e.target.getAttribute("data-id");
+            if (!id) return;
+
+            if (id === "all") {
+                showAll();
+            } else {
+                hideAll();
+
+                let items = viewEl.querySelectorAll(`.item[data-feature="${id}"]`);
+                for (let i = 0; i < items.length; i++) {
+                    items[i].classList.remove("hidden");
+                }
+
+                if (id === "unmarked") {
+                    showAll();
+                    let items = viewEl.querySelectorAll(".item");
+                    for (let i = 0; i < items.length; i++) {
+                        let item = items[i];
+                        if (!item.getAttribute("data-feature")) {
+                            item.classList.remove("hidden");
+                        } else {
+                            item.classList.add("hidden");
+                        }
+                    }
+                } else if (id === "marked") {
+                    let items = viewEl.querySelectorAll(".item");
+                    for (let i = 0; i < items.length; i++) {
+                        let item = items[i];
+                        if (item.getAttribute("data-feature")) {
+                            item.classList.remove("hidden");
+                        }
+                    }
+                } else if (id === "fav") {
+                    let items = viewEl.querySelectorAll(".item");
+                    for (let i = 0; i < items.length; i++) {
+                        let item = items[i];
+                        if (item.getAttribute("data-fav")) {
+                            item.classList.remove("hidden");
+                        }
+                    }
+                }
+
+            }
+
+
+        }
+
+        function setBg(e) {
+
+            let bg = e.target.getAttribute("data-id");
+
+            if (bg) {
+                viewEl.style.backgroundColor = bg;
+            }
+        }
+
+        function onThumbSizeChange() {
+            thumbSize = thumbSizeSlider.value;
+            render();
+        }
+
+        function imgSelectHandler(e) {
+
+            let img = e.target;
+            let id = img.getAttribute("data-id");
+            if (!id) return;
+
+            let obj = filesArr[id];
+            previewEl.src = "src/" + obj.folder + "/" + obj.fileName;
+
+        }
+
+    }
+</script>
+</body>
+</html>

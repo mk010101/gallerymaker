@@ -22,10 +22,10 @@ let filesMap = {};
 
 let keyShiftDown = false;
 
+let features = ["front", "34", "side", "full"];
+
 
 exports.init = function () {
-
-    let features = ["front", "34", "side", "full"];
 
     fileOpen = document.getElementById("open");
     fileSave = document.getElementById("save");
@@ -170,7 +170,26 @@ function keyDownHandler(e) {
 }
 
 function keyUpHandler(e) {
-    if (e.key === "Shift") keyShiftDown = false;
+    if (e.key === "Shift") {
+        keyShiftDown = false;
+    } else {
+        if (e.key === "Backspace") {
+            let conf = window.confirm("OK to delete?");
+            if (conf === true) {
+                let selected = viewEl.querySelectorAll(".selected");
+                for (let i = selected.length-1; i >= 0; i--) {
+                    let id = parseInt(selected[i].getAttribute("data-id"));
+                    let obj = filesArr[id];
+                    let f = obj.path;
+                    filesArr.splice(id, 1);
+                    fs.removeSync(f);
+                }
+                buildView();
+                numFilesEl.innerHTML = filesArr.length + "";
+            }
+        }
+    }
+
 }
 
 
@@ -276,7 +295,6 @@ function setFavourite() {
 function showHide(e) {
 
     let id = e.target.getAttribute("data-id");
-    console.log(id)
     if (!id) return;
 
     selectNone();
@@ -353,8 +371,13 @@ function setBg(e) {
 function save() {
     let obj = {};
     obj.files = filesArr;
+    obj.features = features;
     let json = JSON.stringify(obj);
     fs.writeFileSync(dir + "db.json", json, "utf8");
+
+    let str = fs.readFileSync("./src/viewer.html").toString();
+    str = str.replace(`"__FILES__"`, json);
+    fs.writeFileSync(dir + "index.html", str, "utf8");
 }
 
 function parseDb(file) {
