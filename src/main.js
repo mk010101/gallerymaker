@@ -136,7 +136,7 @@ function parseDirectory(dir, dirName) {
             filesArr.push({
                 folder: dirName,
                 fileName: files[i],
-                path: f,
+                path: dirName + "/" + files[i],
                 feature: null
             });
             if (folders.indexOf(dirName) === -1) {
@@ -157,7 +157,7 @@ function buildView() {
             obj = filesMap[obj.path];
             filesArr[i] = obj;
         }
-        let f = "file:///" + obj.path;
+        let f = "file:///" + pathSrc + obj.path;
         let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
         let fav = obj.fav ? `data-fav="1"` : "";
         let favStyle = obj.fav ? "fav" : "";

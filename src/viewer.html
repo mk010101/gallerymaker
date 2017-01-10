@@ -223,7 +223,7 @@
             for (let i = 0; i < filesArr.length; i++) {
                 let obj = filesArr[i];
 
-                let f = `src/${obj.folder}/${obj.fileName}`;
+                let f = `src/${obj.path}`;
                 let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
                 let fav = obj.fav ? `data-fav="1"` : "";
                 let favStyle = obj.fav? "fav" : "";
