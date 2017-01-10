@@ -114,7 +114,6 @@
 <body>
 <nav>
     <section>files: <span id="num-files"></span></section>
-    <h5>Features</h5>
     <section>
         <h5>Preview size</h5>
         <input type="range" id="thumb-size" min="100" max="500" step="20" value="200">
@@ -171,12 +170,20 @@
         let currentSel = "fav";
 
         let str = "";
-        let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button><button data-id="marked">marked</button><button data-id="fav"><span class="fav" data-id="fav"></span></button><p></p>`;
+        let strShow = `<button data-feature="all">all</button><button data-feature="unmarked">unmarked</button><button data-feature="marked">marked</button><button data-feature="fav"><span class="fav" data-feature="fav"></span></button><p></p>`;
 
-        for (let i = 0; i < features.length; i++) {
-            let f = features[i];
-            strShow += `<button data-id="${f}">${f}</button>`;
-            filesMap[f] = [];
+        for (let i = 0; i < features.main.length; i++) {
+            let f = features.main[i];
+            strShow += `<label><input type="radio" name="r-group" data-feature="${f}">${f}</label>`;
+        }
+
+        strShow += "<p></p>";
+
+        for (let i = 0; i < features.sub.length; i++) {
+            let f = features.sub[i];
+            let ss = `<label><input type="checkbox" data-feature="${f}">${f}</label>`;
+            str += ss;
+            strShow += ss;
         }
         showEl.innerHTML = strShow;
 
@@ -259,18 +266,41 @@
 
         function showHide(e) {
 
-            let id = e.target.getAttribute("data-id");
+            let id = e.target.getAttribute("data-feature");
             if (!id) return;
+
+            if (id === "all" || id === "marked" || id === "unmarked" || id === "fav") {
+                uncheckAll();
+            }
 
             if (id === "all") {
                 showAll();
             } else {
-                hideAll();
+                showAll();
 
-                let items = viewEl.querySelectorAll(`.item[data-feature="${id}"]`);
-                for (let i = 0; i < items.length; i++) {
-                    items[i].classList.remove("hidden");
+                let checked = showEl.querySelectorAll("input:checked");
+                let fObj = {};
+                for (let i = 0; i < checked.length; i++) {
+                    fObj[checked[i].getAttribute("data-feature")] = 1;
                 }
+
+                let items = viewEl.querySelectorAll(`.item`);
+                for (let i = 0; i < items.length; i++) {
+                    let item = items[i];
+                    let itemFeatures = item.getAttribute("data-feature");
+                    if (itemFeatures) {
+                        let props = itemFeatures.split(",");
+                        for (let p in fObj) {
+                            if (props.indexOf(p) < 0) {
+                                item.classList.add("hidden");
+                            }
+                        }
+                    } else {
+                        item.classList.add("hidden");
+                    }
+
+                }
+
 
                 if (id === "unmarked") {
                     showAll();
@@ -308,7 +338,6 @@
         function showHideFolders(e) {
             let id = e.target.getAttribute("data-id");
             if (!id) return;
-
             hideAll();
 
             let items = viewEl.querySelectorAll(`.item[data-folder="${id}"]`);
@@ -316,6 +345,14 @@
                 items[i].classList.remove("hidden");
             }
             setSelectedBtn(e.target);
+            uncheckAll();
+        }
+
+        function uncheckAll() {
+            let checked = showEl.querySelectorAll("input:checked");
+            for (let i = 0; i < checked.length; i++) {
+                checked[i].checked = false;
+            }
         }
 
         function setBg(e) {

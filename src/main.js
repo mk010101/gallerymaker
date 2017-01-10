@@ -22,9 +22,15 @@ let filesMap = {};
 
 let keyShiftDown = false;
 
-let features = ["front", "34", "side", "full"];
+//let features = ["front", "34", "side", "up", "down", "full"];
+
+let features = {
+    main: ["front", "34", "side"],
+    sub: ["full", "tilt-up", "tilt-down", "tilt-side"]
+};
 
 let folders = [];
+
 
 
 exports.init = function () {
@@ -38,12 +44,22 @@ exports.init = function () {
     showEl = document.getElementById("show");
 
     let str = "";
-    let strShow = `<button data-id="all">all</button><button data-id="unmarked">unmarked</button><button data-id="marked">marked</button><button data-id="fav"><span class="fav" data-id="fav"></span></button><p></p>`;
+    let strShow = `<button data-feature="all">all</button><button data-feature="unmarked">unmarked</button><button data-feature="marked">marked</button><button data-feature="fav"><span class="fav" data-feature="fav"></span></button><p></p>`;
 
-    for (let i = 0; i < features.length; i++) {
-        let f = features[i];
+    for (let i = 0; i < features.main.length; i++) {
+        let f = features.main[i];
         str += `<label><input type="radio" name="r-group" data-feature="${f}">${f}</label>`;
-        strShow += `<button data-id="${f}">${f}</button>`
+        strShow += `<label><input type="radio" name="r-group" data-feature="${f}">${f}</label>`;
+    }
+
+    str += "<p></p>";
+    strShow += "<p></p>";
+
+    for (let i = 0; i < features.sub.length; i++) {
+        let f = features.sub[i];
+        let ss = `<label><input type="checkbox" data-feature="${f}">${f}</label>`;
+        str += ss;
+        strShow += ss;
     }
 
     featuresEl.innerHTML = str;
@@ -81,7 +97,7 @@ function onOpenDir() {
 
 function onThumbSizeChange() {
     thumbSize = thumbSizeSlider.value;
-    buildView();
+    render();
 }
 
 function onDirSelect(e) {
@@ -120,7 +136,7 @@ function onDirSelect(e) {
 
     document.getElementById("folders").innerHTML = foldersStr;
 
-    buildView();
+    render();
 
 }
 
@@ -147,7 +163,7 @@ function parseDirectory(dir, dirName) {
 }
 
 
-function buildView() {
+function render() {
 
     let str = "";
 
@@ -198,7 +214,7 @@ function keyUpHandler(e) {
                     filesArr.splice(id, 1);
                     fs.removeSync(f);
                 }
-                buildView();
+                render();
                 numFilesEl.innerHTML = filesArr.length + "";
             }
         }
@@ -245,7 +261,15 @@ function selectNone() {
 
 function checkSelectedStatus() {
 
+    let checked = document.querySelectorAll("#features input:checked");
+    for (let i = 0; i < checked.length; i++) {
+        checked[i].checked = false;
+    }
+
     let selected = viewEl.querySelectorAll(".selected");
+    document.getElementById("num-selected").innerHTML = selected.length + "";
+
+    /*let selected = viewEl.querySelectorAll(".selected");
     document.getElementById("num-selected").innerHTML = selected.length + "";
     let fea = null;
     for (let i = 0; i < selected.length; i++) {
@@ -263,21 +287,28 @@ function checkSelectedStatus() {
             if (inp) inp.checked = false;
         }
     }
-    if (fea) document.querySelector(`#features input[data-feature="${fea}"]`).checked = true;
+    if (fea) document.querySelector(`#features input[data-feature="${fea}"]`).checked = true;*/
 }
 
 function setSelectedStatus() {
 
-    let el = document.querySelector("#features input:checked");
-    if (!el) return;
+    let checked = document.querySelectorAll("#features input:checked");
+    if (checked.length < 1) return;
 
-    let feature = el.getAttribute("data-feature");
+    let features = [];
+    for (let i = 0; i < checked.length; i++) {
+        features.push(checked[i].getAttribute("data-feature"));
+    }
+    let featuresStr = features.join(",");
+
+
+    //let feature = el.getAttribute("data-feature");
     let selected = viewEl.querySelectorAll(".selected");
 
     for (let i = 0; i < selected.length; i++) {
         let id = parseInt(selected[i].getAttribute("data-id"));
         let obj = filesArr[id];
-        obj.feature = feature;
+        obj.feature = featuresStr;
         selected[i].classList.add("marked");
         selected[i].setAttribute("data-feature", obj.feature);
         selected[i].querySelector(".thumb-feature").innerHTML = obj.feature;
@@ -308,20 +339,43 @@ function setFavourite() {
 
 function showHide(e) {
 
-    let id = e.target.getAttribute("data-id");
+    let id = e.target.getAttribute("data-feature");
     if (!id) return;
 
     selectNone();
 
+    if (id === "all" || id === "marked" || id === "unmarked" || id === "fav") {
+        uncheckAll();
+    }
+
     if (id === "all") {
         showAll();
     } else {
-        hideAll();
+        showAll();
 
-        let items = viewEl.querySelectorAll(`.item[data-feature="${id}"]`);
-        for (let i = 0; i < items.length; i++) {
-            items[i].classList.remove("hidden");
+        let checked = showEl.querySelectorAll("input:checked");
+        let fObj = {};
+        for (let i = 0; i < checked.length; i++) {
+            fObj[checked[i].getAttribute("data-feature")] = 1;
         }
+
+        let items = viewEl.querySelectorAll(`.item`);
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i];
+            let itemFeatures = item.getAttribute("data-feature");
+            if (itemFeatures) {
+                let props = itemFeatures.split(",");
+                for (let p in fObj) {
+                    if (props.indexOf(p) < 0) {
+                        item.classList.add("hidden");
+                    }
+                }
+            } else {
+                item.classList.add("hidden");
+            }
+
+        }
+
 
         if (id === "unmarked") {
             showAll();
@@ -368,6 +422,14 @@ function showHideFolders(e) {
         items[i].classList.remove("hidden");
     }
     setSelectedBtn(e.target);
+    uncheckAll();
+}
+
+function uncheckAll() {
+    let checked = showEl.querySelectorAll("input:checked");
+    for (let i = 0; i < checked.length; i++) {
+        checked[i].checked = false;
+    }
 }
 
 
