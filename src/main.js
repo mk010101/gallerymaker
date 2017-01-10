@@ -26,7 +26,7 @@ let keyShiftDown = false;
 
 let features = {
     main: ["front", "34", "side"],
-    sub: ["full", "tilt-up", "tilt-down", "tilt-side"]
+    sub: ["full", "tilt-up", "tilt-down", "tilt-side", "e-closed", "m-open"]
 };
 
 let folders = [];
@@ -397,6 +397,7 @@ function showHide(e) {
                 }
             }
         } else if (id === "fav") {
+            hideAll();
             let items = viewEl.querySelectorAll(".item");
             for (let i = 0; i < items.length; i++) {
                 let item = items[i];
