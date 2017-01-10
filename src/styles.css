@@ -29,6 +29,10 @@ button:hover {
     background-color: #8c99a0;
 }
 
+.btn-selected {
+    background-color: #8c99a0;
+}
+
 nav {
     width: 20vw;
     min-width: 230px;
@@ -50,7 +54,7 @@ section {
     background-color: rgb(245, 98, 68);
 }
 
-#show {
+.show {
     padding: 5px;
     background-color: rgb(110, 194, 210);
 }
@@ -94,6 +98,7 @@ main {
 .fav:before {
     content: "\2605 ";
 }
+
 
 
 

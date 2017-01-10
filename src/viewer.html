@@ -35,6 +35,9 @@
         button:hover {
             background-color: #8c99a0;
         }
+        .btn-selected {
+            background-color: #8c99a0;
+        }
 
         nav {
             width: 20vw;
@@ -57,7 +60,7 @@
             background-color: rgb(245, 98, 68);
         }
 
-        #show {
+        .show {
             padding: 5px;
             background-color: rgb(110, 194, 210);
         }
@@ -116,9 +119,15 @@
         <h5>Preview size</h5>
         <input type="range" id="thumb-size" min="100" max="500" step="20" value="200">
     </section>
+
     <section>
         <h5>Show</h5>
-        <div id="show"></div>
+        <div id="show" class="show"></div>
+    </section>
+
+    <section>
+        <h5>Folders</h5>
+        <div id="folders" class="show"></div>
     </section>
 
     <section>
@@ -169,8 +178,15 @@
             strShow += `<button data-id="${f}">${f}</button>`;
             filesMap[f] = [];
         }
-
         showEl.innerHTML = strShow;
+
+        let foldersStr = "";
+        for (let i = 0; i < data.folders.length; i++) {
+            let f = data.folders[i];
+            foldersStr += `<button data-id="${f}">${f}</button>`;
+        }
+        document.getElementById("folders").innerHTML = foldersStr;
+
 
         parseData();
         setListeners();
@@ -183,6 +199,7 @@
             thumbSizeSlider.addEventListener("change", onThumbSizeChange);
             viewEl.addEventListener("click", imgSelectHandler);
             showEl.addEventListener("click", showHide);
+            document.getElementById("folders").addEventListener("click", showHideFolders);
             
             previewEl.addEventListener("click", function () {
                 previewEl.src = "";
@@ -212,7 +229,7 @@
                 let favStyle = obj.fav? "fav" : "";
 
                 str += `<div class="item"
-                    data-id="${i}" ${feature} ${fav}
+                    data-id="${i}" ${feature} ${fav} data-folder="${obj.folder}"
                     style="background: url('${f}');
                     background-size: contain;
                     background-repeat: no-repeat;
@@ -285,8 +302,20 @@
                 }
 
             }
+            setSelectedBtn(e.target);
+        }
 
+        function showHideFolders(e) {
+            let id = e.target.getAttribute("data-id");
+            if (!id) return;
 
+            hideAll();
+
+            let items = viewEl.querySelectorAll(`.item[data-folder="${id}"]`);
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove("hidden");
+            }
+            setSelectedBtn(e.target);
         }
 
         function setBg(e) {
@@ -313,6 +342,12 @@
             let obj = filesArr[id];
             previewEl.src = "src/" + obj.folder + "/" + obj.fileName;
 
+        }
+
+        function setSelectedBtn(btn) {
+            let sel = document.querySelector(".btn-selected");
+            if (sel) sel.classList.remove("btn-selected");
+            btn.classList.add("btn-selected");
         }
 
     }

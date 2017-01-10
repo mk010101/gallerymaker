@@ -24,6 +24,8 @@ let keyShiftDown = false;
 
 let features = ["front", "34", "side", "full"];
 
+let folders = [];
+
 
 exports.init = function () {
 
@@ -58,6 +60,7 @@ function setListeners() {
     document.getElementById("select-none").addEventListener("click", selectNone);
     document.getElementById("bg").addEventListener("click", setBg);
     document.getElementById("fav").addEventListener("click", setFavourite);
+    document.getElementById("folders").addEventListener("click", showHideFolders);
     fileOpen.addEventListener("change", onDirSelect);
     thumbSizeSlider.addEventListener("change", onThumbSizeChange);
     viewEl.addEventListener("click", imgSelectHandler);
@@ -86,6 +89,7 @@ function onDirSelect(e) {
     filesArr = [];
     db = {files: []};
     filesMap = {};
+    folders = [];
 
     dir = e.path[0].files[0].path + "/";
     pathSrc = e.path[0].files[0].path + "/src/";
@@ -108,6 +112,14 @@ function onDirSelect(e) {
 
     numFilesEl.innerHTML = filesArr.length + "";
 
+    let foldersStr = "";
+    for (let i = 0; i < folders.length; i++) {
+        let f = folders[i];
+        foldersStr += `<button data-id="${f}">${f}</button>`;
+    }
+
+    document.getElementById("folders").innerHTML = foldersStr;
+
     buildView();
 
 }
@@ -120,15 +132,17 @@ function parseDirectory(dir, dirName) {
     for (let i = 0; i < files.length; i++) {
 
         let f = dir + "/" + files[i];
-        if (f.search(/.png|.jpg/i) > -1) {
+        if (f.search(/.png|.jpg|.jpeg|.svg/i) > -1) {
             filesArr.push({
                 folder: dirName,
                 fileName: files[i],
                 path: f,
                 feature: null
             });
+            if (folders.indexOf(dirName) === -1) {
+                folders.push(dirName);
+            }
         }
-
     }
 }
 
@@ -146,11 +160,11 @@ function buildView() {
         let f = "file:///" + obj.path;
         let feature = obj.feature ? `data-feature="${obj.feature}"` : "";
         let fav = obj.fav ? `data-fav="1"` : "";
-        let favStyle = obj.fav? "fav" : "";
+        let favStyle = obj.fav ? "fav" : "";
         let marked = obj.feature ? "marked" : "";
         let markedDiv = obj.feature ? `<div class="thumb-feature ${favStyle}">${obj.feature}</div>` : "<div class='thumb-feature'></div>";
         str += `<div class="item ${marked}" 
-                    data-id="${i}" ${feature} ${fav}
+                    data-id="${i}" ${feature} ${fav} data-folder="${obj.folder}"
                     style="background: url('${f}'); 
                     background-size: contain; 
                     background-repeat: no-repeat; 
@@ -177,7 +191,7 @@ function keyUpHandler(e) {
             let conf = window.confirm("OK to delete?");
             if (conf === true) {
                 let selected = viewEl.querySelectorAll(".selected");
-                for (let i = selected.length-1; i >= 0; i--) {
+                for (let i = selected.length - 1; i >= 0; i--) {
                     let id = parseInt(selected[i].getAttribute("data-id"));
                     let obj = filesArr[id];
                     let f = obj.path;
@@ -339,9 +353,23 @@ function showHide(e) {
         }
 
     }
-
-
+    setSelectedBtn(e.target);
 }
+
+function showHideFolders(e) {
+    let id = e.target.getAttribute("data-id");
+    if (!id) return;
+
+    selectNone();
+    hideAll();
+
+    let items = viewEl.querySelectorAll(`.item[data-folder="${id}"]`);
+    for (let i = 0; i < items.length; i++) {
+        items[i].classList.remove("hidden");
+    }
+    setSelectedBtn(e.target);
+}
+
 
 function hideAll() {
     let items = viewEl.querySelectorAll(".item");
@@ -372,6 +400,7 @@ function save() {
     let obj = {};
     obj.files = filesArr;
     obj.features = features;
+    obj.folders = folders;
     let json = JSON.stringify(obj);
     fs.writeFileSync(dir + "db.json", json, "utf8");
 
@@ -386,6 +415,12 @@ function parseDb(file) {
         let obj = files[i];
         filesMap[obj.path] = obj;
     }
+}
+
+function setSelectedBtn(btn) {
+    let sel = document.querySelector(".btn-selected");
+    if (sel) sel.classList.remove("btn-selected");
+    btn.classList.add("btn-selected");
 }
 
 
